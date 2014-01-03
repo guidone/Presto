@@ -10,15 +10,15 @@ var logger = require('/presto/logger');
 * Navigation manager
 */
 var Navigation = Class.extend({
-	
+
 	className: 'navigation',
-	
+
 	/**
 	* @property {Number} length
 	* Number of window open in the stack of the navigation group
 	*/
 	length: 0,
-	
+
 	/**
 	* @property {presto.AppManager} _app
 	* Instance of the app manager
@@ -32,9 +32,9 @@ var Navigation = Class.extend({
 	* @return {Ti.UI.NavigationGroup}
 	*/
 	get: function() {
-		return this._navigation;	
+		return this._navigation;
 	},
-	
+
 	/**
 	* @constructor init
 	* Initialize the navigation manager
@@ -43,38 +43,53 @@ var Navigation = Class.extend({
 	init: function(window) {
 
 		// create the navigation group, before the panel is created and attach events
-		this._navigation = Ti.UI.iPhone.createNavigationGroup({
+		this._navigation = Ti.UI.iOS.createNavigationWindow({
 			window: window,
-			width: Ti.UI.FILL,
-			borderRadius: '2dp' 
+			width: Ti.Platform.displayCaps.platformWidth,
+			borderRadius: '2dp',
+			statusBarStyle: Ti.UI.iPhone.StatusBar.GREY
 		});
-	
+
+		this._navigation.open();
+
 		this.length = 1;
-	
-		return this;	
+
+		return this;
 	},
-	
+
+	/**
+	* @method hide
+	* Hide the navigation group
+	*/
 	hide: function() {
-	
+
 		//this._navigation.remove();
-//		this._navigation.hide();
-//		this._navigation.visible = false;
+		this._navigation.hide();
+
+		return this;
 	},
-	
+
 	/**
 	* @method destroy
 	* Destroy the object
 	*/
 	destroy: function() {
-		
+
 		// nothing to do
-		
+
 	},
-	
+
+	/**
+	* @method show
+	* Show the navigation group
+	*/
 	show: function() {
+
 		this._navigation.show();
+
+		return this;
 	},
-	
+
 	/**
 	* @method open
 	* Open a new window inside the navigation
@@ -82,22 +97,22 @@ var Navigation = Class.extend({
 	* @chainable
 	*/
 	open: function(plugin) {
-		
-		logger.info('open@navigation');
-		
+
+		//logger.info('open@navigation');
+
 		var that = this;
-		
+
 		// open the window
-		that._navigation.open(plugin.getWindow());
+		that._navigation.openWindow(plugin.getWindow());
 		// set again the navigation (not really necessary)
 		//plugin.setNavigation(that.getNavigation());
-		
+
 		// increment stack counter
 		that.length += 1;
-	
-		return that;	
+
+		return that;
 	},
-	
+
 	/**
 	* @method close
 	* Close a window associated with a plugin
@@ -105,14 +120,14 @@ var Navigation = Class.extend({
 	* @chainable
 	*/
 	close: function(plugin) {
-		
+
 		var that = this;
 		var window = plugin.getWindow();
 
-		that._navigation.close(window);
+		that._navigation.closeWindow(window);
 
-		that.length -= 1;	
-	
+		that.length -= 1;
+
 		return that;
 	},
 
@@ -121,21 +136,21 @@ var Navigation = Class.extend({
 	* Open a window
 	* @param {Ti.UI.Window} window
 	* @chainable
-	*/	
+	*/
 	openWindow: function(window) {
 
 		var that = this;
-		
+
 		// open the window
 		that._navigation.open(window);
 		// set again the navigation (not really necessary)
 		//plugin.setNavigation(that.getNavigation());
-		
+
 		// increment stack counter
 		that.length += 1;
-	
+
 		return that;
-		
+
 	},
 
 	/**
@@ -145,16 +160,16 @@ var Navigation = Class.extend({
 	* @chainable
 	*/
 	closeWindow: function(window) {
-		
+
 		var that = this;
 
 		that._navigation.close(window);
 
-		that.length -= 1;	
-	
+		that.length -= 1;
+
 		return that;
-	}	
-	
+	}
+
 
 });
 

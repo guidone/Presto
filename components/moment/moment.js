@@ -568,7 +568,7 @@
         }
         if (!languages[key] && hasModule) {
             try {
-                require('./components/moment/lang/' + key);
+                require('/presto/components/moment/lang/' + key);
             } catch (e) {
                 // call with no params to set to default
                 return moment.fn._lang;

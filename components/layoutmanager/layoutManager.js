@@ -4,7 +4,7 @@
 var _ = require('/presto/components/underscore/underscore');
 var Class = require('/presto/components/inheritance/inheritance').Class;
 var Backbone = require('/presto/components/backbone/backbone');
-var orientationUtils = require('components/orientationUtils/orientationUtils');
+var orientationUtils = require('/presto/components/orientationUtils/orientationUtils');
 var logger = require('/presto/logger');
 var Platform = require('/presto/helpers/diads');
 

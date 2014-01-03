@@ -784,8 +784,6 @@ var AppManager = Class.extend({
 		// destroy the menu
 		//that.menu.destroy();
 
-		this.mainWindow.close();
-		this.mainWindow = null;
 	},
 
 	/**
@@ -868,18 +866,6 @@ var AppManager = Class.extend({
 					//logger.info('Found a sessionId -> '+Cloud.sessionId);
 				}
 
-				// main window, for show hide purpouse must be the same size of the viewport
-				// in order to slide and reveal the underlying menu
-				that.mainWindow = Ti.UI.createWindow({
-					width: Ti.Platform.displayCaps.platformWidth,
-					orientationModes: [
-						Ti.UI.LANDSCAPE_LEFT, Ti.UI.LANDSCAPE_RIGHT, Ti.UI.PORTRAIT
-						]
-				});
-				Ti.Gesture.addEventListener('orientationchange',function() {
-					that.mainWindow.width = Ti.Platform.displayCaps.platformWidth+'dp';
-				});
-
 				that.loadContent(options)
 					.done(function() {
 
@@ -906,12 +892,14 @@ var AppManager = Class.extend({
 						// add the navigation controller to the main window
 						jQ.when(homePlugin.onBeforeShow())
 							.done(function() {
+
 								// attach the navigation to the main window
-								that.mainWindow.add(homePlugin.getNavigation().get());
+								//that.mainWindow.add(homePlugin.getNavigation().get());
 
 								// open the main window
-								that.mainWindow.open();
-								that.menu.setClient(that.mainWindow);
+								//that.mainWindow.open();
+								//that.menu.setClient(that.mainWindow);
+								that.menu.setClient(homePlugin.getNavigation().get());
 								that.menu.getWindow().show();
 
 								// fire start event
@@ -974,27 +962,29 @@ var AppManager = Class.extend({
 
 					if (navigation == null) {
 
+						that._pluginCurrent.hide();
 						// remove from main window the current plugin navigation group
-						that.mainWindow.remove(that._pluginCurrent.getNavigation().get());
+						//that.mainWindow.remove(that._pluginCurrent.getNavigation().get());
 
 						// this is the root of the stack, create a navigation group inside this plugin
 						if (!plugin.hasNavigation()) {
 							plugin.createNavigation();
 						}
 						// add the new window
-						that.mainWindow.add(plugin.getNavigation().get());
+						//that.mainWindow.add(plugin.getNavigation().get());
+
 						// swap the current plugin
 						that._pluginCurrent = plugin;
+
+						that.menu.setClient(plugin.getNavigation().get());
+						//that.menu.getWindow().show();
+						plugin.show();
 
 
 					} else {
 
-						// a navigation object was passed, open with this without destroying anything
-						// get the navigation from the current plugin which doesn't change, it' still the root
-						// of the whole stack
-						var new_navigation = that._pluginCurrent.getNavigation();
-						// open the window using the navigation
-						new_navigation.open(plugin);
+						// do not close the previous plugin and do not change the current plugin (which is always root)
+						navigation.open(plugin);
 					}
 
 					deferred.resolve();

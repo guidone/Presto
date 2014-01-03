@@ -4,8 +4,8 @@
 
 // --- EXTERNAL LIBS ---
 
-var _ = require("components/underscore/underscore");
-var Class = require("components/inheritance/inheritance").Class;
+var _ = require("/presto/components/underscore/underscore");
+var Class = require("/presto/components/inheritance/inheritance").Class;
 
 // --- PRIVATE ATTRIBUTES/FUNCTIONS ---
 
@@ -52,9 +52,9 @@ var TARGETS = {
  * This library offers the app a centralized loggin system
  */
 var Logger = Class.extend({
-    
+
     // --- ATTRIBUTES ---
-    
+
     /*
     _attributesMap : {
         level : DEFAULTS.level,
@@ -64,9 +64,9 @@ var Logger = Class.extend({
         ignoreFunctions : DEFAULTS.ignoreFunctions
     },
     */
-    
+
     // --- INIT ---
-    
+
     init : function(params) {
         var that = this;
         this._attributesMap = {
@@ -82,17 +82,17 @@ var Logger = Class.extend({
             that.set(key, value);
         });
     },
-    
+
     get : function(key) {
         return this._attributesMap[key];
     },
-    
+
     set : function(key, value) {
-        this._attributesMap[key] = this.validate(key, value) ? value : DEFAULTS[key]; 
+        this._attributesMap[key] = this.validate(key, value) ? value : DEFAULTS[key];
     },
-    
+
     // --- METHODS ---
-    
+
     validate : function(key, value) {
         switch (key) {
             case KEYS.LEVELS:
@@ -139,14 +139,14 @@ var Logger = Class.extend({
             ignoreFunctions : this.get(KEYS.IGNORE_FUNCTIONS)
         };
         */
-        
+
         options.level = this.validate(KEYS.LEVEL, options.level) ? options.level : this.get(KEYS.LEVEL);
         options.target = this.validate(KEYS.TARGET, options.target) ? options.target : this.get(KEYS.TARGET);
         options.appendTimeStamp = this.validate(KEYS.APPEND_TIME_STAMP, options.appendTimeStamp) ? options.appendTimeStamp : this.get(KEYS.APPEND_TIME_STAMP);
         options.tag = this.validate(KEYS.TAG, options.tag) ? options.tag : this.get(KEYS.TAG);
         options.ignoreFunctions = this.validate(KEYS.IGNORE_FUNCTIONS, options.ignoreFunctions) ? options.ignoreFunctions : this.get(KEYS.IGNORE_FUNCTIONS);
         options.separationLines = this.validate(KEYS.SEPARATION_LINES, options.separationLines) ? options.separationLines : this.get(KEYS.SEPARATION_LINES);
-        
+
         if (LEVEL_POINTS[options.level] < LEVEL_POINTS[this.get("level")]) return;
 
         /*
@@ -166,7 +166,7 @@ var Logger = Class.extend({
             options.ignoreFunctions = this.get(KEYS.IGNORE_FUNCTIONS);
         }
         */
-        
+
         if (_.isArray(msg)) {
             var msgStr = "";
             _.each(msg, function(elem) {

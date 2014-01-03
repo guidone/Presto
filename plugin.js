@@ -1211,7 +1211,7 @@ var Plugin = Base.extend({
 	action: function(action) {
 
 		var that = this;
-try {
+
 		if (_.isString(action)) {
 			var lookup_action = that.app.getAction(action);
 			if (lookup_action == null) {
@@ -1226,9 +1226,45 @@ try {
 		} else {
 			Ti.API.error('Action '+action.name+' has not a valid executor (function)');
 		}
-} catch(e) {
-	Ti.API.info('eeeeeeeee '+JSON.stringify(e));
-}
+
+	},
+
+	/**
+	* @method hide
+	* Hide the plugin, hide the navigation group or, if not exists, the window
+	* @chainable
+	*/
+	hide: function() {
+
+		var that = this;
+
+		// if has navigation, hide it, otherwise window
+		if (that.hasNavigation()) {
+			that.getNavigation().hide();
+		} else {
+			that.getWindow().hide();
+		}
+
+		return that;
+	},
+
+	/**
+	* @method show
+	* Show the plugin, reveal the navigation group or, if not exists, the window
+	* @chainable
+	*/
+	show: function() {
+
+		var that = this;
+
+		// if has navigation, hide it, otherwise window
+		if (that.hasNavigation()) {
+			that.getNavigation().show();
+		} else {
+			that.getWindow().show();
+		}
+
+		return that;
 	},
 
 	/**
