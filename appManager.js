@@ -935,6 +935,8 @@ var AppManager = Class.extend({
 	*/
 	open: function(id,navigation) {
 
+		Ti.API.info('open@AppManager');
+
 		var plugin = null;
 		var that = this;
 		var deferred = jQ.Deferred();
@@ -957,42 +959,58 @@ var AppManager = Class.extend({
 			}
 
 			// add the new navigation
-			jQ.when(plugin.onBeforeShow())
+			jQ.when(
+				plugin.requiresAuthentication() && that.login != null ?
+					that.login.login() : true
+				)
 				.done(function() {
 
-					if (navigation == null) {
+					// start the opening
+					jQ.when(plugin.onBeforeShow())
+						.done(function() {
 
-						that._pluginCurrent.hide();
-						// remove from main window the current plugin navigation group
-						//that.mainWindow.remove(that._pluginCurrent.getNavigation().get());
+							if (navigation == null) {
 
-						// this is the root of the stack, create a navigation group inside this plugin
-						if (!plugin.hasNavigation()) {
-							plugin.createNavigation();
-						}
-						// add the new window
-						//that.mainWindow.add(plugin.getNavigation().get());
+								that._pluginCurrent.hide();
+								// remove from main window the current plugin navigation group
+								//that.mainWindow.remove(that._pluginCurrent.getNavigation().get());
 
-						// swap the current plugin
-						that._pluginCurrent = plugin;
+								// this is the root of the stack, create a navigation group inside this plugin
+								if (!plugin.hasNavigation()) {
+									plugin.createNavigation();
+								}
+								// add the new window
+								//that.mainWindow.add(plugin.getNavigation().get());
 
-						that.menu.setClient(plugin.getNavigation().get());
-						//that.menu.getWindow().show();
-						plugin.show();
+								// swap the current plugin
+								that._pluginCurrent = plugin;
+
+								that.menu.setClient(plugin.getNavigation().get());
+								//that.menu.getWindow().show();
+								plugin.show();
 
 
-					} else {
+							} else {
 
-						// do not close the previous plugin and do not change the current plugin (which is always root)
-						navigation.open(plugin);
-					}
+								// do not close the previous plugin and do not change the current plugin (which is always root)
+								navigation.open(plugin);
+							}
 
-					deferred.resolve();
+							deferred.resolve();
+						})
+						.fail(function() {
+							// che succede se fallisce
+							deferred.reject();
+						});
+
 				})
 				.fail(function() {
-					// che succede se fallisce
+
+					Ti.API.info('Authentication failed for plugin '+plugin.id);
 					deferred.reject();
+
 				});
+
 
 		} else {
 			throw('No plugin found with this id: '+id);

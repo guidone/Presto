@@ -141,8 +141,10 @@ var Navigation = Class.extend({
 
 		var that = this;
 
+		Ti.API.info('openWindow@navivation -> '+JSON.stringify(window));
+
 		// open the window
-		that._navigation.open(window);
+		that._navigation.openWindow(window);
 		// set again the navigation (not really necessary)
 		//plugin.setNavigation(that.getNavigation());
 
@@ -163,7 +165,7 @@ var Navigation = Class.extend({
 
 		var that = this;
 
-		that._navigation.close(window);
+		that._navigation.closeWindow(window);
 
 		that.length -= 1;
 

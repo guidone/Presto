@@ -405,9 +405,27 @@ var Plugin = Base.extend({
 			* Momentjs format for the date time, use only long format here, since locale dependent formattation is handled by
 			* Momentjs itself
 			*/
-			dateTimeFormat: 'LL, LT'
+			dateTimeFormat: 'LL, LT',
+
+			/**
+			* @property {Boolean} [authentication=false]
+			* Requires authentication, if not logged, ask for login on {@link presto.AppManager#open}
+			*/
+			authentication: false
 
 		};
+
+	},
+
+	/**
+	* @method requiresAuthentication
+	* Tells if the plugin requires authentication to be opened
+	* @return {Boolean}
+	* @protected
+	*/
+	requiresAuthentication: function() {
+
+		return this._options.authentication;
 
 	},
 
@@ -868,24 +886,35 @@ var Plugin = Base.extend({
 	* @method getWindowLayout
 	* Returns the default layout of the window that will decorate the layout in case it doesn't have one, make sure the
 	* window will have a .pr-window class, the plugin use it to find the window during the creation of the layout
+	* @param {Object} options
+	* @param {Object} options.leftButton Custom layout object for left button
+	* @param {Object} options.rightButton Custom layout object for right button
 	* @return {Object}
 	* @private
 	*/
-	getWindowLayout: function() {
+	getWindowLayout: function(opts) {
 
 		var that = this;
 		var options = that._options;
 		var navigation = that.getNavigation();
 		var isRoot = navigation != null && navigation.length >= 1 ? false : true;
+		var default_params = {
+			leftButton: null,
+			rightButton: null
+		};
+		var params = _.extend(default_params,opts);
+
 		var windowLayout = {
 			type: 'window',
 			title: options.title,
 			className: 'pr-window pr-window-'+that.className.toLowerCase(),
-			leftNavButton: {
-				type: 'button',
-				className: isRoot ?
-					'pr-toolbarbtn pr-toolbarbtn-menu' : 'pr-toolbarbtn pr-toolbarbtn-back'
-			}
+			leftNavButton: params.leftButton != null ?
+				params.leftButton :
+				{
+					type: 'button',
+					className: isRoot ?
+						'pr-toolbarbtn pr-toolbarbtn-menu' : 'pr-toolbarbtn pr-toolbarbtn-back'
+				}
 		};
 
 		// attach in the layout the button or the view for the action
