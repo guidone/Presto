@@ -116,10 +116,10 @@ var AppManager = Class.extend({
 		onSession: null,
 
 		/**
-		* @cfg {Boolean} requiresLogin
-		* Requires login to access the app
+		* @cfg {Boolean} authentication
+		* Requires login to access the app (not implemented yet)
 		*/
-		requiresLogin: false,
+		authentication: false,
 
 		/**
 		* @cfg {String} [dbName=presto]

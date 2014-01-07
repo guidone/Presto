@@ -240,6 +240,24 @@ var Plugin = Base.extend({
 	},
 
 	/**
+	* @method clearLayoutManager
+	* Destroy the layout manager, a new one will be created with {@link presto.Plugin#getLayoutManager}, use this if
+	* subsequent call to {@link presto.Plugin#refresh} creates messed up windows
+	* @chainable
+	*/
+	clearLayoutManager: function() {
+
+		var that = this;
+
+		if (that._layout != null) {
+			that._layout.clear();
+			that._layout = null;
+		}
+
+		return that;
+	},
+
+	/**
 	* @method get
 	* Get an elment of the layout given the id
 	* @param {String} id
@@ -365,12 +383,6 @@ var Plugin = Base.extend({
 			* persisted in the "content" stage of the bootstrap
 			*/
 			content: null,
-
-			/**
-			* @cfg {Boolean} requiresLogin
-			* Requires login to access the app
-			*/
-			requiresLogin: false,
 
 			/**
 			* @cfg {Function} onRefresh
@@ -1039,8 +1051,14 @@ var Plugin = Base.extend({
 		var layout = that.getLayoutManager();
 		var my_layout = that.getLayout();
 
-		// remove everything from the window
+		// get the window
 		var window = that.getWindow();
+		// exit if window is null
+		if (window == null) {
+			Ti.API.info('No window is defined, not refreshing');
+			return that;
+		}
+		// remove everything from the window
 		_(window.children).each(function(item) {
 			window.remove(item);
 		});
