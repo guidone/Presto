@@ -17,6 +17,7 @@ var Diads = require('/presto/helpers/diads');
 var logger = require('/presto/logger');
 var moment = require('/presto/components/moment/moment');
 
+
 /**
 * @class presto.AppManager
 * Application manager
@@ -53,11 +54,18 @@ var AppManager = Class.extend({
 	className: 'app',
 
 	/**
-	* @cfg {String} property
+	* @cfg {String} id
 	* Id fo the app, must match the id in tiapp.xml, needed to run the app in TiShadow (otherwise some assets could be
-	* missing)
+	* missing) in order to override the default one of the TiShadow app
 	*/
 	id: null,
+
+  /**
+  * @cfg {String} name
+	* Id fo the app, must match the name in tiapp.xml, needed to run the app in TiShadow (otherwise some assets could be
+	* missing) in order to override the default one of the TiShadow app
+  */
+  name: Ti.App.name,
 
 	/**
 	* @property {Array} _plugins
@@ -844,7 +852,7 @@ var AppManager = Class.extend({
 
 		if (this.isTiShadow()) {
 			// in tishadow the app path is inside documents
-			return Ti.Filesystem.applicationDataDirectory+this.id+'/';
+			return Ti.Filesystem.applicationDataDirectory+this._options.name+'/';
 		} else {
 			return Titanium.Filesystem.resourcesDirectory;
 		}

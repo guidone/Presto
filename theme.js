@@ -11,41 +11,41 @@ var logger = require('/presto/logger');
 * Instance of the theme class
 */
 var Theme = Class.extend({
-	
+
 	app: null,
-		
+
 	/**
 	* @constructor init
 	*/
 	init: function(app,opts) {
-		
+
 		var default_settings = {
-			theme: null		
+			theme: null
 		};
 		this._options = _.extend(default_settings,opts);
-		
+
 		this.app = app;
-		
-		
+
+
 		return this;
 	},
-	
+
 	/**
 	* @method getPath
 	* Get the theme path, with final slash
 	* @return {String}
 	*/
 	getPath: function() {
-	
+
 		if (this.app.isTiShadow()) {
 			// in tishadow the app path is inside documents
-			return Ti.Filesystem.applicationDataDirectory+this.app.id+'/themes/'+this._options.theme+'/';
+			return Ti.Filesystem.applicationDataDirectory+this._options.name+'/themes/'+this._options.theme+'/';
 		} else {
-			return Titanium.Filesystem.resourcesDirectory+'themes/'+this._options.theme+'/';			
+			return Titanium.Filesystem.resourcesDirectory+'themes/'+this._options.theme+'/';
 		}
-		
+
 	}
-	
+
 });
 
 module.exports = Theme;
