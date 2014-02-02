@@ -23,6 +23,24 @@ var moment = require('/presto/components/moment/moment');
 */
 var AppManager = Class.extend({
 
+  /**
+  * @property {String} AcsOauthSecret
+  * Set programmatically Oauth Secret, useful to be used with TiShadow
+  */
+	AcsOauthSecret: null,
+
+  /**
+  * @property {String} AcsOauthKey
+  * Set programmatically Oauth Key, useful to be used with TiShadow
+  */
+	AcsOauthKey: null,
+
+  /**
+  * @property {String} AcsApiKey
+  * Set programmatically Oauth API Key, useful to be used with TiShadow
+  */
+	AcsApiKey: null,
+
 	/**
 	* @event start
 	* Fired when the app starts
@@ -393,6 +411,26 @@ var AppManager = Class.extend({
 
 		// merge the options
 		that._options = _.extend({},that._defaultOptions,opts);
+
+    // set acs api key
+    if (that._options.AcsOauthSecret != null) {
+      logger.info('Using AcsOauthSecret: '+that._options.AcsOauthSecret);
+      Ti.App.Properties.setString('acs-oauth-secret',that._options.AcsOauthSecret);
+      Ti.App.Properties.setString('acs-oauth-secret-production',that._options.AcsOauthSecret);
+      Ti.App.Properties.setString('acs-oauth-secret-development',that._options.AcsOauthSecret);
+    }
+    if (that._options.AcsOauthKey != null) {
+      logger.info('Using AcsOauthKey: '+that._options.AcsOauthKey);
+      Ti.App.Properties.setString('acs-oauth-key',that._options.AcsOauthKey);
+      Ti.App.Properties.setString('acs-oauth-key-production',that._options.AcsOauthKey);
+      Ti.App.Properties.setString('acs-oauth-key-development',that._options.AcsOauthKey);
+    }
+    if (that._options.AcsApiKey != null) {
+      logger.info('Using AcsApiKey: '+that._options.AcsApiKey);
+      Ti.App.Properties.setString('acs-api-key',that._options.AcsApiKey);
+      Ti.App.Properties.setString('acs-api-key-production',that._options.AcsApiKey);
+      Ti.App.Properties.setString('acs-api-key-development',that._options.AcsApiKey);
+    }
 
 		// sets the id
 		that.id = that._options.id;
