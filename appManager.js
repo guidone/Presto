@@ -16,31 +16,13 @@ var Theme = require('/presto/theme');
 var Diads = require('/presto/helpers/diads');
 var logger = require('/presto/logger');
 var moment = require('/presto/components/moment/moment');
-
+var _version = '0.1.0'; // version of Presto
 
 /**
 * @class presto.AppManager
 * Application manager
 */
 var AppManager = Class.extend({
-
-  /**
-  * @property {String} AcsOauthSecret
-  * Set programmatically Oauth Secret, useful to be used with TiShadow
-  */
-	AcsOauthSecret: null,
-
-  /**
-  * @property {String} AcsOauthKey
-  * Set programmatically Oauth Key, useful to be used with TiShadow
-  */
-	AcsOauthKey: null,
-
-  /**
-  * @property {String} AcsApiKey
-  * Set programmatically Oauth API Key, useful to be used with TiShadow
-  */
-	AcsApiKey: null,
 
 	/**
 	* @event start
@@ -52,20 +34,6 @@ var AppManager = Class.extend({
 	* Class name this is used to resolve the styles of UI in this plugin
 	*/
 	className: 'app',
-
-	/**
-	* @cfg {String} id
-	* Id fo the app, must match the id in tiapp.xml, needed to run the app in TiShadow (otherwise some assets could be
-	* missing) in order to override the default one of the TiShadow app
-	*/
-	id: null,
-
-  /**
-  * @cfg {String} name
-	* Id fo the app, must match the name in tiapp.xml, needed to run the app in TiShadow (otherwise some assets could be
-	* missing) in order to override the default one of the TiShadow app
-  */
-  name: Ti.App.name,
 
 	/**
 	* @property {Array} _plugins
@@ -91,6 +59,31 @@ var AppManager = Class.extend({
 	_actions: null,
 
 	_defaultOptions: {
+
+    /**
+    * @cfg {String} name
+  	* Id fo the app, must match the name in tiapp.xml, needed to run the app in TiShadow (otherwise some assets could be
+  	* missing) in order to override the default one of the TiShadow app
+    */
+    name: Ti.App.name,
+
+    /**
+    * @cfg {String} AcsOauthSecret
+    * Set programmatically Oauth Secret, useful to be used with TiShadow
+    */
+  	AcsOauthSecret: null,
+
+    /**
+    * @cfg {String} AcsOauthKey
+    * Set programmatically Oauth Key, useful to be used with TiShadow
+    */
+  	AcsOauthKey: null,
+
+    /**
+    * @cfg {String} AcsApiKey
+    * Set programmatically Oauth API Key, useful to be used with TiShadow
+    */
+  	AcsApiKey: null,
 
 		/**
 		* @cfg {String} id
@@ -378,9 +371,6 @@ var AppManager = Class.extend({
 			//});
 
 		}
-
-
-
 
 		return deferred.promise();
 	},
@@ -1072,8 +1062,18 @@ var AppManager = Class.extend({
 	ERROR_AUTHENTICATION_FAILED: 1
 
 
+});
 
-
+/**
+* @property {String} version
+* Version of Presto framework
+*/
+Object.defineProperty(AppManager.prototype,'version',{
+	get: function() {
+		return _version;
+	},
+	enumerable: true,
+	configurable: false
 });
 
 module.exports = AppManager;

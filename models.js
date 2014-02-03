@@ -198,6 +198,78 @@ var sqliteSync_objects = Sync({
 */
 var Base = Backbone.Model.extend({
 
+  /**
+  * @property {String} id
+  * Id of the photo
+  */
+  /**
+  * @property {String} tag
+  * Content class the image belongs to
+  */
+  /**
+  * @property {Number} size
+  * Size in bytes of image
+  */
+  /**
+  * @property {Date} created_at
+  */
+  /**
+  * @property {Date} updated_at
+  */
+  /**
+  * @property {String} id_user
+  * User id who uplaoded the image
+  */
+  /**
+  * @property {String} square_75
+  * Path to a 75x75 version of the image
+  */
+  /**
+  * @property {String} thumb_100
+  * Path to a 100 width thumb of the image
+  */
+  /**
+  * @property {String} small_240
+  * Path to a 240 width version of the image
+  */
+  /**
+  * @property {String} small_500
+  * Path to a 500 width version of the image
+  */
+  /**
+  * @property {String} small_640
+  * Path to a 640 width version of the image
+  */
+  /**
+  * @property {String} large_1024
+  * Path to a 1024 width version of the image
+  */
+  /**
+  * @property {String} original
+  * Path to the original image
+  */
+  /**
+  * @property {String} md5
+  * Md5 hash of the image (the original)
+  */
+  /**
+  * @property {String} title
+  * Title of the image, set this in the custom field 'title' in ACS
+  */
+  /**
+  * @property {String} description
+  * Description of the image, set this in the custom field 'description' in ACS
+  */
+  /**
+  * @property {Object} custom_fields
+  * Hash with all custom field of the images
+  */
+  /**
+  * @property {String} language
+  * Language locale of the image, if empty, is not language aware
+  */
+
+
 	/**
 	* @method getPhoto
 	* Return the current photo of the model (resolves id_photo)

@@ -37,9 +37,10 @@ var Theme = Class.extend({
 	*/
 	getPath: function() {
 
+    var options = this.app.getOptions();
 		if (this.app.isTiShadow()) {
 			// in tishadow the app path is inside documents
-			return Ti.Filesystem.applicationDataDirectory+this._options.name+'/themes/'+this._options.theme+'/';
+			return Ti.Filesystem.applicationDataDirectory+options.name+'/themes/'+this._options.theme+'/';
 		} else {
 			return Titanium.Filesystem.resourcesDirectory+'themes/'+this._options.theme+'/';
 		}
