@@ -16,6 +16,7 @@ var Theme = require('/presto/theme');
 var Diads = require('/presto/helpers/diads');
 var logger = require('/presto/logger');
 var moment = require('/presto/components/moment/moment');
+var _version = '0.1.0'; // version of Presto
 
 /**
 * @class presto.AppManager
@@ -33,13 +34,6 @@ var AppManager = Class.extend({
 	* Class name this is used to resolve the styles of UI in this plugin
 	*/
 	className: 'app',
-
-	/**
-	* @cfg {String} property
-	* Id fo the app, must match the id in tiapp.xml, needed to run the app in TiShadow (otherwise some assets could be
-	* missing)
-	*/
-	id: null,
 
 	/**
 	* @property {Array} _plugins
@@ -65,6 +59,31 @@ var AppManager = Class.extend({
 	_actions: null,
 
 	_defaultOptions: {
+
+    /**
+    * @cfg {String} name
+  	* Id fo the app, must match the name in tiapp.xml, needed to run the app in TiShadow (otherwise some assets could be
+  	* missing) in order to override the default one of the TiShadow app
+    */
+    name: Ti.App.name,
+
+    /**
+    * @cfg {String} AcsOauthSecret
+    * Set programmatically Oauth Secret, useful to be used with TiShadow
+    */
+  	AcsOauthSecret: null,
+
+    /**
+    * @cfg {String} AcsOauthKey
+    * Set programmatically Oauth Key, useful to be used with TiShadow
+    */
+  	AcsOauthKey: null,
+
+    /**
+    * @cfg {String} AcsApiKey
+    * Set programmatically Oauth API Key, useful to be used with TiShadow
+    */
+  	AcsApiKey: null,
 
 		/**
 		* @cfg {String} id
@@ -353,9 +372,6 @@ var AppManager = Class.extend({
 
 		}
 
-
-
-
 		return deferred.promise();
 	},
 
@@ -393,6 +409,26 @@ var AppManager = Class.extend({
 
 		// merge the options
 		that._options = _.extend({},that._defaultOptions,opts);
+
+    // set acs api key
+    if (that._options.AcsOauthSecret != null) {
+      logger.info('Using AcsOauthSecret: '+that._options.AcsOauthSecret);
+      Ti.App.Properties.setString('acs-oauth-secret',that._options.AcsOauthSecret);
+      Ti.App.Properties.setString('acs-oauth-secret-production',that._options.AcsOauthSecret);
+      Ti.App.Properties.setString('acs-oauth-secret-development',that._options.AcsOauthSecret);
+    }
+    if (that._options.AcsOauthKey != null) {
+      logger.info('Using AcsOauthKey: '+that._options.AcsOauthKey);
+      Ti.App.Properties.setString('acs-oauth-key',that._options.AcsOauthKey);
+      Ti.App.Properties.setString('acs-oauth-key-production',that._options.AcsOauthKey);
+      Ti.App.Properties.setString('acs-oauth-key-development',that._options.AcsOauthKey);
+    }
+    if (that._options.AcsApiKey != null) {
+      logger.info('Using AcsApiKey: '+that._options.AcsApiKey);
+      Ti.App.Properties.setString('acs-api-key',that._options.AcsApiKey);
+      Ti.App.Properties.setString('acs-api-key-production',that._options.AcsApiKey);
+      Ti.App.Properties.setString('acs-api-key-development',that._options.AcsApiKey);
+    }
 
 		// sets the id
 		that.id = that._options.id;
@@ -806,7 +842,7 @@ var AppManager = Class.extend({
 
 		if (this.isTiShadow()) {
 			// in tishadow the app path is inside documents
-			return Ti.Filesystem.applicationDataDirectory+this.id+'/';
+			return Ti.Filesystem.applicationDataDirectory+this._options.name+'/';
 		} else {
 			return Titanium.Filesystem.resourcesDirectory;
 		}
@@ -1026,8 +1062,18 @@ var AppManager = Class.extend({
 	ERROR_AUTHENTICATION_FAILED: 1
 
 
+});
 
-
+/**
+* @property {String} version
+* Version of Presto framework
+*/
+Object.defineProperty(AppManager.prototype,'version',{
+	get: function() {
+		return _version;
+	},
+	enumerable: true,
+	configurable: false
 });
 
 module.exports = AppManager;

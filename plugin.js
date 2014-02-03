@@ -9,6 +9,7 @@ var LayoutManager = require('/presto/components/layoutmanager/layoutManager').La
 var logger = require('/presto/logger');
 var jQ = require('/presto/libs/deferred/jquery-deferred');
 
+
 /*
 
 TODO
@@ -25,6 +26,12 @@ TODO
 * @extend presto.Base
 */
 var Plugin = Base.extend({
+
+  /**
+  * @property {String} _version
+  * Version of the plugin
+  */
+  version: '0.0.0',
 
 	/**
 	* @property {String} className
@@ -99,14 +106,16 @@ var Plugin = Base.extend({
 	*/
 	getTags: function() {
 
-		var result = [];
+		var result = {};
 		var that = this;
 
-		if (_.isObject(that._options.tags)) {
-			result = _.extend(result,that._options.tags);
-		}
+    // take from plugin config
 		if (_.isObject(that.tags)) {
 			result = _.extend(result,that.tags);
+		}
+    // tags in config has precedence
+		if (_.isObject(that._options.tags)) {
+			result = _.extend(result,that._options.tags);
 		}
 
 		return result;
@@ -897,7 +906,8 @@ var Plugin = Base.extend({
 	/**
 	* @method getWindowLayout
 	* Returns the default layout of the window that will decorate the layout in case it doesn't have one, make sure the
-	* window will have a .pr-window class, the plugin use it to find the window during the creation of the layout
+	* window will have a ".pr-window" class, the plugin use it to find the window during the creation of the layout. An additional
+	* "pr-window-nameoftheclass" class will be added, using the class of the plugin lower cased
 	* @param {Object} options
 	* @param {Object} options.leftButton Custom layout object for left button
 	* @param {Object} options.rightButton Custom layout object for right button
@@ -1463,6 +1473,5 @@ Object.defineProperty(Plugin.prototype,'model',{
 	enumerable: true,
 	configurable: false
 });
-
 
 module.exports = Plugin;

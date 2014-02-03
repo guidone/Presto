@@ -71,11 +71,12 @@ var Navigation = Class.extend({
 
 	/**
 	* @method destroy
-	* Destroy the object
+	* Destroy the navigation window
 	*/
 	destroy: function() {
 
-		// nothing to do
+    this._navigation.close();
+    this._navigation = null;
 
 	},
 

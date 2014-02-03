@@ -116,10 +116,25 @@ var moment = require('/presto/components/moment/moment');
 /**
 * @class presto.models.ContentClass
 * Dictionary which defines a content class. Each content class (which can be considered a taxonomy) is defined in Node ACS through the tags.
+*
+* A plugin defines a content class which describe what content should be downloaded from ACS in the device. Every content in ACS which has a tag equal to the class name is downloaded locally.
+*
+* Only the content types defined in the array **types** are actually downloaded (different plugins might be interested in a different sets of information), for some content type it's possible to specify additional information, like the **imageSizes** to be downloaded.
+*
+* Contents are also filtered by *language*, all lanuages are downloaded in the device but just the ones matching the locale of the device will be actually displayed (en, it, etc).
+*
+* If contents are preloaded on the device, once downloaded from the App Store, the app doesn't need to download anything unless a new version of the contents are available (for example some of them were modified after the release).
+*
+* At startup **Presto** check the content version of the content in ACS and, if a newer version is found, the entire content class id downloaded (images with the same md5 hash are left untouched).
+*
+* Each content class has a version, is possibile to update single content class by just incrementing (+1) the version number in the related key (the class name) in the Custom Object "home" in ACS.
+*
 * Each content in Node ACS could have any number of custom fields, some of them have special meanings
 *
-* - *language*: tells the locale of the content, if {@link presto.models.ContentClass#language} must be set to true to properly filtering
+* - *language*: tells the locale of the content, {@link presto.models.ContentClass#language} must be set to true to properly filtering
 * - *url*: the url of a public website for sharing
+* - *title*: the title of the content
+* - *description*: the description of the content (an abstract)
 *
 */
 /**
@@ -197,6 +212,78 @@ var sqliteSync_objects = Sync({
 * Base class for all models
 */
 var Base = Backbone.Model.extend({
+
+  /**
+  * @property {String} id
+  * Id of the photo
+  */
+  /**
+  * @property {String} tag
+  * Content class the image belongs to
+  */
+  /**
+  * @property {Number} size
+  * Size in bytes of image
+  */
+  /**
+  * @property {Date} created_at
+  */
+  /**
+  * @property {Date} updated_at
+  */
+  /**
+  * @property {String} id_user
+  * User id who uplaoded the image
+  */
+  /**
+  * @property {String} square_75
+  * Path to a 75x75 version of the image
+  */
+  /**
+  * @property {String} thumb_100
+  * Path to a 100 width thumb of the image
+  */
+  /**
+  * @property {String} small_240
+  * Path to a 240 width version of the image
+  */
+  /**
+  * @property {String} small_500
+  * Path to a 500 width version of the image
+  */
+  /**
+  * @property {String} small_640
+  * Path to a 640 width version of the image
+  */
+  /**
+  * @property {String} large_1024
+  * Path to a 1024 width version of the image
+  */
+  /**
+  * @property {String} original
+  * Path to the original image
+  */
+  /**
+  * @property {String} md5
+  * Md5 hash of the image (the original)
+  */
+  /**
+  * @property {String} title
+  * Title of the image, set this in the custom field 'title' in ACS
+  */
+  /**
+  * @property {String} description
+  * Description of the image, set this in the custom field 'description' in ACS
+  */
+  /**
+  * @property {Object} custom_fields
+  * Hash with all custom field of the images
+  */
+  /**
+  * @property {String} language
+  * Language locale of the image, if empty, is not language aware
+  */
+
 
 	/**
 	* @method getPhoto
