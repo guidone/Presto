@@ -116,10 +116,25 @@ var moment = require('/presto/components/moment/moment');
 /**
 * @class presto.models.ContentClass
 * Dictionary which defines a content class. Each content class (which can be considered a taxonomy) is defined in Node ACS through the tags.
+*
+* A plugin defines a content class which describe what content should be downloaded from ACS in the device. Every content in ACS which has a tag equal to the class name is downloaded locally.
+*
+* Only the content types defined in the array **types** are actually downloaded (different plugins might be interested in a different sets of information), for some content type it's possible to specify additional information, like the **imageSizes** to be downloaded.
+*
+* Contents are also filtered by *language*, all lanuages are downloaded in the device but just the ones matching the locale of the device will be actually displayed (en, it, etc).
+*
+* If contents are preloaded on the device, once downloaded from the App Store, the app doesn't need to download anything unless a new version of the contents are available (for example some of them were modified after the release).
+*
+* At startup **Presto** check the content version of the content in ACS and, if a newer version is found, the entire content class id downloaded (images with the same md5 hash are left untouched).
+*
+* Each content class has a version, is possibile to update single content class by just incrementing (+1) the version number in the related key (the class name) in the Custom Object "home" in ACS.
+*
 * Each content in Node ACS could have any number of custom fields, some of them have special meanings
 *
-* - *language*: tells the locale of the content, if {@link presto.models.ContentClass#language} must be set to true to properly filtering
+* - *language*: tells the locale of the content, {@link presto.models.ContentClass#language} must be set to true to properly filtering
 * - *url*: the url of a public website for sharing
+* - *title*: the title of the content
+* - *description*: the description of the content (an abstract)
 *
 */
 /**
