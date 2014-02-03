@@ -360,7 +360,13 @@ var sqliteSync_posts = Sync({
 
 /**
 * @class presto.models.Post
-* Base class for node ACS Posts
+* Base class for node ACS Posts, each model reflects a post in ACS. Some custom field could have a particulare meaning for Presto
+*
+* - **language**: defines the local in which the post must be displayed, if {@link presto.models.ContentClass#language} is false,
+* in the related content class, has no meaning
+* - **description**: used somewhere as short description of the post (an abstract)
+* - **url**: the URL of this post out in the web, used for sharing the content
+*
 * @extend presto.models.Base
 */
 var Post = Base.extend({
