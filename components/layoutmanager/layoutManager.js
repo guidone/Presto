@@ -125,6 +125,7 @@ var _typeMap = {
 	textArea: 'createTextArea',
 	toolbar: 'createToolbar',
 	splitWindow: 'createSplitWindow',
+	videoPlayer: 'createVideoPlayer',
 	popover: {method: 'createPopover', scope: Ti.UI.iPad}
 };
 var _typeKeys = _(_typeMap).keys();
@@ -135,6 +136,9 @@ function executeAPI(scope,method,renderedStyle) {
 	var result = null;
 
 	switch(method) {
+		case 'createVideoPlayer':
+      result = Ti.Media.createVideoPlayer(renderedStyle);
+		  break;
 		case 'createTextArea':
 			result = Ti.UI.createTextArea(renderedStyle);
 			break;

@@ -8,26 +8,26 @@ var logger = require('/presto/logger');
 var moment = require('/presto/components/moment/moment');
 
 /*
-		"id": "5189761e9ff9ed15b00a687b",
-		"first_name": "Guido",
-		"last_name": "Bellomo",
-		"created_at": "2013-05-07T21:46:06+0000",
-		"updated_at": "2013-11-09T18:50:46+0000",
-		"external_accounts": [],
-		"email": "guido.bellomo@gmail.com",
-		"confirmed_at": "2013-05-07T21:46:06+0000",
-		"username": "guidone",
-		"role": "Admin",
-		"admin": "true",
-		"stats": {
-			"photos": {
-				"total_count": 14
-			},
-			"storage": {
-				"used": 7432435
-			}
-		}
-	}],
+    "id": "5189761e9ff9ed15b00a687b",
+    "first_name": "Guido",
+    "last_name": "Bellomo",
+    "created_at": "2013-05-07T21:46:06+0000",
+    "updated_at": "2013-11-09T18:50:46+0000",
+    "external_accounts": [],
+    "email": "guido.bellomo@gmail.com",
+    "confirmed_at": "2013-05-07T21:46:06+0000",
+    "username": "guidone",
+    "role": "Admin",
+    "admin": "true",
+    "stats": {
+      "photos": {
+        "total_count": 14
+      },
+      "storage": {
+        "used": 7432435
+      }
+    }
+  }],
 */
 
 /**
@@ -176,35 +176,35 @@ var moment = require('/presto/components/moment/moment');
 */
 
 var sqliteSync_versions = Sync({
-	db_name: 'presto',
-	table_name: 'versions',
-	debug: false,
-	columns: {
-		'tag': 'string',
-		'version': 'number'
-	}
+  db_name: 'presto',
+  table_name: 'versions',
+  debug: false,
+  columns: {
+    'tag': 'string',
+    'version': 'number'
+  }
 });
 var Version = Backbone.Model.extend({
-	sync: sqliteSync_versions
+  sync: sqliteSync_versions
 });
 var Versions = Backbone.Collection.extend({
-	model: Version,
-	sync: sqliteSync_versions
+  model: Version,
+  sync: sqliteSync_versions
 });
 
 
 var sqliteSync_objects = Sync({
-	db_name: 'presto',
-	table_name: 'objects',
-	debug: false,
-	primaryKey: 'guid',
-	columns: {
-		'tag': 'string',
-		'created_at': 'date',
-		'updated_at': 'date',
-		'json': 'string',
-		'language': 'string'
-	}
+  db_name: 'presto',
+  table_name: 'objects',
+  debug: false,
+  primaryKey: 'guid',
+  columns: {
+    'tag': 'string',
+    'created_at': 'date',
+    'updated_at': 'date',
+    'json': 'string',
+    'language': 'string'
+  }
 });
 
 /**
@@ -235,6 +235,327 @@ var Base = Backbone.Model.extend({
   * @property {String} id_user
   * User id who uplaoded the image
   */
+  /**
+  * @property {Object} custom_fields
+  * Hash with all custom field of the images
+  */
+  /**
+  * @property {String} language
+  * Language locale of the image, if empty, is not language aware
+  */
+
+
+  /**
+  * @method getPhoto
+  * Return the current photo of the model (resolves id_photo)
+  * @return {presto.models.Photo}
+  */
+  getPhoto: function() {
+
+    var that = this;
+    var id_photo = that.get('id_photo');
+    var result = null;
+
+    if (id_photo != null) {
+
+      var photos = new Photos();
+      photos.fetch({
+        where: 'id = ?',
+        params: id_photo
+      });
+
+      result = photos.length !== 0 ? photos.at(0) : null;
+
+    }
+
+    return result;
+  },
+
+  /**
+  * @method getCustomFields
+  * Get decoded custom fields from ACS
+  * @return {Object}
+  */
+  getCustomFields: function() {
+
+    var that = this;
+    var json = that.get('custom_fields');
+    var result = null;
+
+    if (json != null && json !== '') {
+      try {
+        result = JSON.parse(json);
+      } catch(e) {
+        // do nothing
+      }
+
+    }
+
+    return result;
+  },
+
+  /**
+  * @method getCustomField
+  * Returns a custom field if exists, or null
+  * @param {String} field
+  * @return {Mixed}
+  */
+  getCustomField: function(key) {
+
+    var that = this;
+    var json = that.getCustomFields(key);
+
+    return json != null ? json[key] : null;
+  },
+
+  /**
+  * @method getContent
+  * Get the content of the post somehow formatted
+  * @param {Object} options
+  * @param {Boolean} [options.stripHtml=false] Remove html tags
+  * @param {Number} [options.length=0] Number of chars to keep, 0 means all
+  * @param {String} [options.elipsize=...] Chars to put at the end of the string if truncated
+  * @return {String}
+  */
+  getContent: function(opts) {
+
+    var that = this;
+    var default_options = {
+      stripHtml: false,
+      length: 0,
+      elipsize: '...'
+    };
+    var options = _.extend(default_options,opts);
+    var result = that.get('content');
+
+    if (options.stripHtml) {
+      result = result.replace(/(<([^>]+)>)/ig,'');
+    }
+
+    if (options.length > 0) {
+      var tmp = result.substr(0,options.length)+(result.length > options.length ? options.elipsize : '');
+      result = tmp;
+    }
+
+    return result;
+  }
+
+});
+
+
+/**
+* @class presto.models.Obj
+* Base class for node ACS Objects
+*/
+var Obj = Backbone.Model.extend({
+
+  sync: sqliteSync_objects,
+
+  /**
+  * @method get
+  * Override basic get method, if not in the Backbone attribute, decode and search in json field
+  * @param {String} key
+  * @return {Mixed}
+  */
+  get: function(key) {
+
+    var that = this;
+
+    if (that.attributes[key] !== undefined) {
+      return Obj.__super__.get.apply(that,arguments);
+    } else {
+      if (that._json == null) {
+        try {
+          that._json = JSON.parse(that.get('json'));
+        } catch(e) {
+          Ti.API.error('Error parsing json object');
+          that._json = {};
+        }
+      }
+      return that._json[key];
+    }
+
+  }
+
+});
+var ObjList = Backbone.Collection.extend({
+  model: Obj,
+  sync: sqliteSync_objects
+});
+
+
+var sqliteSync_posts = Sync({
+  db_name: 'presto',
+  table_name: 'posts',
+  debug: false,
+  primaryKey: 'guid',
+  columns: {
+    'tag': 'string',
+    'title': 'string',
+    'description': 'string',
+    'content': 'string',
+    'created_at': 'date',
+    'updated_at': 'date',
+    'filename': 'string',
+    'id_user': 'string',
+    'id_photo': 'string',
+    'custom_fields': 'string',
+    'language': 'string'
+  }
+});
+
+
+/**
+* @class presto.models.Post
+* Base class for node ACS Posts, each model reflects a post in ACS. Some custom field could have a particulare meaning for Presto
+*
+* - **language**: defines the local in which the post must be displayed, if {@link presto.models.ContentClass#language} is false,
+* in the related content class, has no meaning
+* - **description**: used somewhere as short description of the post (an abstract)
+* - **url**: the URL of this post out in the web, used for sharing the content
+*
+* @extend presto.models.Base
+*/
+var Post = Base.extend({
+
+  sync: sqliteSync_posts,
+
+  /**
+  * @method toJSON
+  * Serialize the post including, if present, the photo
+  * @return {Object}
+  */
+  toJSON: function() {
+
+    var that = this;
+    var result = _.clone(that.attributes);
+    var photo = that.getPhoto();
+
+    if (photo != null) {
+      result.photo = photo.toJSON();
+    }
+
+    return result;
+  }
+
+});
+var PostList = Backbone.Collection.extend({
+  model: Post,
+  sync: sqliteSync_posts
+});
+
+
+
+var sqliteSync_events = Sync({
+  db_name: 'presto',
+  table_name: 'events',
+  debug: false,
+  primaryKey: 'guid',
+  columns: {
+    'tag': 'string',
+    'title': 'string',
+    'name': 'string',
+    'description': 'string',
+    'details': 'string',
+    'content': 'string',
+    'created_at': 'date',
+    'updated_at': 'date',
+    'id_user': 'string',
+    'id_photo': 'string',
+    'id_place': 'string',
+    'custom_fields': 'string',
+    'start_time': 'date',
+    'ical': 'string',
+    'recurring': 'string',
+    'recurring_count': 'number',
+    'recurring_until': 'date',
+    'language': 'string'
+  }
+});
+
+
+/**
+* @class presto.models.Event
+* Base class for node ACS Events
+* @extend presto.models.Base
+*/
+var Event = Base.extend({
+  sync: sqliteSync_events,
+
+  /**
+  * @method toJSON
+  * Serialize the post including, if present, the photo
+  * @return {Object}
+  */
+  toJSON: function() {
+
+    var that = this;
+    var result = _.clone(that.attributes);
+    var photo = that.getPhoto();
+
+    if (photo != null) {
+      result.photo = photo.toJSON();
+    }
+
+    // convert and format all dates
+    /*_(_.keys(that.attributes)).each(function(key) {
+      var the_value = that.get(key);
+      if (_.isDate(the_value)) {
+        result[key] = moment(the_value).format('MMM Do YY');
+      }
+    });*/
+
+
+    return result;
+  }
+
+});
+var EventList = Backbone.Collection.extend({
+  model: Event,
+  sync: sqliteSync_events
+});
+
+
+
+
+var sqliteSync_photos = Sync({
+  db_name: 'presto',
+  table_name: 'photos',
+  debug: false,
+  primaryKey: 'guid',
+  columns: {
+    'tag': 'string',
+    'filename': 'string',
+    'size': 'number',
+    'created_at': 'date',
+    'updated_at': 'date',
+    'id_user': 'string',
+    'processed': 'boolean',
+    'square_75': 'string',
+    'thumb_100': 'string',
+    'small_240': 'string',
+    'medium_500': 'string',
+    'medium_640': 'string',
+    'large_1024': 'string',
+    'original': 'string',
+    'content_type': 'string',
+    'md5': 'string',
+    'title': 'string',
+    'description': 'string',
+    'custom_fields': 'string',
+    'language': 'string'
+  }
+});
+var IMAGE_FIELDS = ['square_75','thumb_100','small_240','medium_500','medium_640','large_1024','original'];
+
+
+/**
+* @class presto.models.Photo
+* Base class for node ACS Photos
+*/
+var Photo = Backbone.Model.extend({
+  sync: sqliteSync_photos,
+
   /**
   * @property {String} square_75
   * Path to a 75x75 version of the image
@@ -275,405 +596,148 @@ var Base = Backbone.Model.extend({
   * @property {String} description
   * Description of the image, set this in the custom field 'description' in ACS
   */
+
+  // don't use it yet
+  saveOrUpdate: function() {
+
+    var that = this;
+
+    // if already exists, then changes just the modified fields, mixup
+    var photos = new Photos();
+    photos.fetch({
+      where: 'id = ?',
+      params: that.guid
+    });
+
+    if (photos.length !== 0) {
+      var my_photo = photos.at(0);
+      var validFields = {};
+      _(IMAGE_FIELDS).each(function(field) {
+        if (that.get(field) != null) {
+          validFields[field] = that.get(field);
+        }
+      });
+      my_photo.save(validFields);
+
+    } else {
+
+      that.save.apply(that,arguments);
+
+    }
+  },
+
   /**
-  * @property {Object} custom_fields
-  * Hash with all custom field of the images
+  * @method getCustomFields
+  * Get decoded custom fields from ACS
+  * @return {Object}
   */
-  /**
-  * @property {String} language
-  * Language locale of the image, if empty, is not language aware
-  */
-
-
-	/**
-	* @method getPhoto
-	* Return the current photo of the model (resolves id_photo)
-	* @return {presto.models.Photo}
-	*/
-	getPhoto: function() {
-
-		var that = this;
-		var id_photo = that.get('id_photo');
-		var result = null;
-
-		if (id_photo != null) {
-
-			var photos = new Photos();
-			photos.fetch({
-				where: 'id = ?',
-				params: id_photo
-			});
-
-			result = photos.length !== 0 ? photos.at(0) : null;
-
-		}
-
-		return result;
-	},
-
-	/**
-	* @method getCustomFields
-	* Get decoded custom fields from ACS
-	* @return {Object}
-	*/
-	getCustomFields: function() {
-
-		var that = this;
-		var json = that.get('custom_fields');
-		var result = null;
-
-		if (json != null && json !== '') {
-			try {
-				result = JSON.parse(json);
-			} catch(e) {
-				// do nothing
-			}
-
-		}
-
-		return result;
-	},
-
-	/**
-	* @method getCustomField
-	* Returns a custom field if exists, or null
-	* @param {String} field
-	* @return {Mixed}
-	*/
-	getCustomField: function(key) {
-
-		var that = this;
-		var json = that.getCustomFields(key);
-
-		return json != null ? json[key] : null;
-	},
-
-	/**
-	* @method getContent
-	* Get the content of the post somehow formatted
-	* @param {Object} options
-	* @param {Boolean} [options.stripHtml=false] Remove html tags
-	* @param {Number} [options.length=0] Number of chars to keep, 0 means all
-	* @param {String} [options.elipsize=...] Chars to put at the end of the string if truncated
-	* @return {String}
-	*/
-	getContent: function(opts) {
-
-		var that = this;
-		var default_options = {
-			stripHtml: false,
-			length: 0,
-			elipsize: '...'
-		};
-		var options = _.extend(default_options,opts);
-		var result = that.get('content');
-
-		if (options.stripHtml) {
-			result = result.replace(/(<([^>]+)>)/ig,'');
-		}
-
-		if (options.length > 0) {
-			var tmp = result.substr(0,options.length)+(result.length > options.length ? options.elipsize : '');
-			result = tmp;
-		}
-
-		return result;
-	}
-
-});
-
-
-/**
-* @class presto.models.Obj
-* Base class for node ACS Objects
-*/
-var Obj = Backbone.Model.extend({
-
-	sync: sqliteSync_objects,
-
-	/**
-	* @method get
-	* Override basic get method, if not in the Backbone attribute, decode and search in json field
-	* @param {String} key
-	* @return {Mixed}
-	*/
-	get: function(key) {
-
-		var that = this;
-
-		if (that.attributes[key] !== undefined) {
-			return Obj.__super__.get.apply(that,arguments);
-		} else {
-			if (that._json == null) {
-				try {
-					that._json = JSON.parse(that.get('json'));
-				} catch(e) {
-					Ti.API.error('Error parsing json object');
-					that._json = {};
-				}
-			}
-			return that._json[key];
-		}
-
-	}
-
-});
-var ObjList = Backbone.Collection.extend({
-	model: Obj,
-	sync: sqliteSync_objects
-});
-
-
-var sqliteSync_posts = Sync({
-	db_name: 'presto',
-	table_name: 'posts',
-	debug: false,
-	primaryKey: 'guid',
-	columns: {
-		'tag': 'string',
-		'title': 'string',
-		'description': 'string',
-		'content': 'string',
-		'created_at': 'date',
-		'updated_at': 'date',
-		'filename': 'string',
-		'id_user': 'string',
-		'id_photo': 'string',
-		'custom_fields': 'string',
-		'language': 'string'
-	}
-});
-
-
-/**
-* @class presto.models.Post
-* Base class for node ACS Posts, each model reflects a post in ACS. Some custom field could have a particulare meaning for Presto
-*
-* - **language**: defines the local in which the post must be displayed, if {@link presto.models.ContentClass#language} is false,
-* in the related content class, has no meaning
-* - **description**: used somewhere as short description of the post (an abstract)
-* - **url**: the URL of this post out in the web, used for sharing the content
-*
-* @extend presto.models.Base
-*/
-var Post = Base.extend({
-
-	sync: sqliteSync_posts,
-
-	/**
-	* @method toJSON
-	* Serialize the post including, if present, the photo
-	* @return {Object}
-	*/
-	toJSON: function() {
-
-		var that = this;
-		var result = _.clone(that.attributes);
-		var photo = that.getPhoto();
-
-		if (photo != null) {
-			result.photo = photo.toJSON();
-		}
-
-		return result;
-	}
-
-});
-var PostList = Backbone.Collection.extend({
-	model: Post,
-	sync: sqliteSync_posts
-});
-
-
-
-var sqliteSync_events = Sync({
-	db_name: 'presto',
-	table_name: 'events',
-	debug: false,
-	primaryKey: 'guid',
-	columns: {
-		'tag': 'string',
-		'title': 'string',
-		'name': 'string',
-		'description': 'string',
-		'details': 'string',
-		'content': 'string',
-		'created_at': 'date',
-		'updated_at': 'date',
-		'id_user': 'string',
-		'id_photo': 'string',
-		'id_place': 'string',
-		'custom_fields': 'string',
-		'start_time': 'date',
-		'ical': 'string',
-		'recurring': 'string',
-		'recurring_count': 'number',
-		'recurring_until': 'date',
-		'language': 'string'
-	}
-});
-
-
-/**
-* @class presto.models.Event
-* Base class for node ACS Events
-* @extend presto.models.Base
-*/
-var Event = Base.extend({
-	sync: sqliteSync_events,
-
-	/**
-	* @method toJSON
-	* Serialize the post including, if present, the photo
-	* @return {Object}
-	*/
-	toJSON: function() {
-
-		var that = this;
-		var result = _.clone(that.attributes);
-		var photo = that.getPhoto();
-
-		if (photo != null) {
-			result.photo = photo.toJSON();
-		}
-
-		// convert and format all dates
-		/*_(_.keys(that.attributes)).each(function(key) {
-			var the_value = that.get(key);
-			if (_.isDate(the_value)) {
-				result[key] = moment(the_value).format('MMM Do YY');
-			}
-		});*/
-
-
-		return result;
-	}
-
-});
-var EventList = Backbone.Collection.extend({
-	model: Event,
-	sync: sqliteSync_events
-});
-
-
-
-
-var sqliteSync_photos = Sync({
-	db_name: 'presto',
-	table_name: 'photos',
-	debug: false,
-	primaryKey: 'guid',
-	columns: {
-		'tag': 'string',
-		'filename': 'string',
-		'size': 'number',
-		'created_at': 'date',
-		'updated_at': 'date',
-		'id_user': 'string',
-		'processed': 'boolean',
-		'square_75': 'string',
-		'thumb_100': 'string',
-		'small_240': 'string',
-		'medium_500': 'string',
-		'medium_640': 'string',
-		'large_1024': 'string',
-		'original': 'string',
-		'content_type': 'string',
-		'md5': 'string',
-		'title': 'string',
-		'description': 'string',
-		'custom_fields': 'string',
-		'language': 'string'
-	}
-});
-var IMAGE_FIELDS = ['square_75','thumb_100','small_240','medium_500','medium_640','large_1024','original'];
-
-
-/**
-* @class presto.models.Photo
-* Base class for node ACS Photos
-*/
-var Photo = Backbone.Model.extend({
-	sync: sqliteSync_photos,
-
-	// don't use it yet
-	saveOrUpdate: function() {
-
-		var that = this;
-
-		// if already exists, then changes just the modified fields, mixup
-		var photos = new Photos();
-		photos.fetch({
-			where: 'id = ?',
-			params: that.guid
-		});
-
-		if (photos.length !== 0) {
-			var my_photo = photos.at(0);
-			var validFields = {};
-			_(IMAGE_FIELDS).each(function(field) {
-				if (that.get(field) != null) {
-					validFields[field] = that.get(field);
-				}
-			});
-			my_photo.save(validFields);
-
-		} else {
-
-			that.save.apply(that,arguments);
-
-		}
-	},
-
-	/**
-	* @method getCustomFields
-	* Get decoded custom fields from ACS
-	* @return {Object}
-	*/
-	getCustomFields: function() {
-
-		var that = this;
-		var json = that.get('custom_fields');
-		var result = null;
-
-		if (json != null && json !== '') {
-			try {
-				result = JSON.parse(json);
-			} catch(e) {
-				// do nothing
-			}
-
-		}
-
-		return result;
-	}
+  getCustomFields: function() {
+
+    var that = this;
+    var json = that.get('custom_fields');
+    var result = null;
+
+    if (json != null && json !== '') {
+      try {
+        result = JSON.parse(json);
+      } catch(e) {
+        // do nothing
+      }
+
+    }
+
+    return result;
+  }
 
 });
 var Photos = Backbone.Collection.extend({
-	model: Photo,
-	sync: sqliteSync_photos
+  model: Photo,
+  sync: sqliteSync_photos
 });
+
+
+var sqliteSync_files = Sync({
+  db_name: 'presto',
+  table_name: 'files',
+  debug: false,
+  primaryKey: 'guid',
+  columns: {
+    'tag': 'string',
+    'url': 'string',
+    'created_at': 'date',
+    'updated_at': 'date',
+    'name': 'string',
+    'title': 'string',
+    'description': 'string',
+    'custom_fields': 'string',
+    'language': 'string',
+    'file_name': 'string'
+  }
+});
+
+
+/**
+* @class presto.models.File
+* Base class for node ACS File
+*/
+var File = Backbone.Model.extend({
+  sync: sqliteSync_files,
+
+  /**
+  * @method getCustomFields
+  * Get decoded custom fields from ACS
+  * @return {Object}
+  */
+  getCustomFields: function() {
+
+    var that = this;
+    var json = that.get('custom_fields');
+    var result = null;
+
+    if (json != null && json !== '') {
+      try {
+        result = JSON.parse(json);
+      } catch(e) {
+        // do nothing
+      }
+
+    }
+
+    return result;
+  }
+
+});
+var Files = Backbone.Collection.extend({
+  model: File,
+  sync: sqliteSync_files
+});
+
+
 
 // Export
 module.exports = {
-	post: {
-		model: Post,
-		list: PostList
-	},
-	photo: {
-		model: Photo,
-		list: Photos
-	},
-	object: {
-		model: Obj,
-		list: ObjList
-	},
-	version: {
-		model: Version,
-		list: Versions
-	},
-	event: {
-		model: Event,
-		list: EventList
-	}
+  post: {
+    model: Post,
+    list: PostList
+  },
+  photo: {
+    model: Photo,
+    list: Photos
+  },
+  object: {
+    model: Obj,
+    list: ObjList
+  },
+  version: {
+    model: Version,
+    list: Versions
+  },
+  event: {
+    model: Event,
+    list: EventList
+  },
+  file: {
+    model: File,
+    list: Files
+  }
 };

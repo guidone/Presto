@@ -767,15 +767,6 @@ module.exports.style = {
 
   },
 
-
-
-
-
-
-
-
-
-
   '.pr-list': {
 
     width: Ti.UI.FILL,
@@ -793,6 +784,11 @@ module.exports.style = {
 
     }
 
+  },
+
+  '.pr-video-player': {
+    width: Ti.UI.FILL,
+    height: Ti.UI.FILL
   }
 
 };

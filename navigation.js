@@ -11,167 +11,189 @@ var logger = require('/presto/logger');
 */
 var Navigation = Class.extend({
 
-	className: 'navigation',
+  className: 'navigation',
 
-	/**
-	* @property {Number} length
-	* Number of window open in the stack of the navigation group
-	*/
-	length: 0,
+  /**
+  * @property {Number} length
+  * Number of window open in the stack of the navigation group
+  */
+  length: 0,
 
-	/**
-	* @property {presto.AppManager} _app
-	* Instance of the app manager
-	* @private
-	*/
-	_navigation: null,
+  /**
+  * @property {presto.AppManager} _app
+  * Instance of the app manager
+  * @private
+  */
+  _navigation: null,
 
-	/**
-	* @method get
-	* Current instance of the navigation
-	* @return {Ti.UI.NavigationGroup}
-	*/
-	get: function() {
-		return this._navigation;
-	},
+  /**
+  * @method get
+  * Current instance of the navigation
+  * @return {Ti.UI.NavigationGroup}
+  */
+  get: function() {
+    return this._navigation;
+  },
 
-	/**
-	* @constructor init
-	* Initialize the navigation manager
-	* @param {Ti.UI.Window} window
-	*/
-	init: function(window) {
+  updateSize: function(evt) {
+    this._navigation.width = Ti.Platform.displayCaps.platformWidth+'dp';
+  },
 
-		// create the navigation group, before the panel is created and attach events
-		this._navigation = Ti.UI.iOS.createNavigationWindow({
-			window: window,
-			width: Ti.Platform.displayCaps.platformWidth,
-			borderRadius: '2dp',
-			statusBarStyle: Ti.UI.iPhone.StatusBar.GREY
-		});
+  /**
+  * @constructor init
+  * Initialize the navigation manager
+  * @param {Ti.UI.Window} window
+  * @param {Object} options
+  * @param {Object} options.orientable Change the size of the container with the orientation
+  * @chainable
+  */
+  init: function(window,opts) {
 
-		this._navigation.open();
+    var that = this;
+    var default_options = {
+      orientable: false
+    };
+    that._options = _.extend(default_options,opts);
 
-		this.length = 1;
+    // create the navigation group, before the panel is created and attach events
+    that._navigation = Ti.UI.iOS.createNavigationWindow({
+      window: window,
+      width: Ti.Platform.displayCaps.platformWidth,
+      borderRadius: '2dp',
+      statusBarStyle: Ti.UI.iPhone.StatusBar.GREY
+    });
+    if (that._options.orientable) {
+      that._updateSize = _.bind(function(evt) {
+        that._navigation.width = Ti.Platform.displayCaps.platformWidth+'dp';
+      },that);
+      Ti.Gesture.addEventListener('orientationchange',that._updateSize);
+    }
 
-		return this;
-	},
+    this._navigation.open();
 
-	/**
-	* @method hide
-	* Hide the navigation group
-	*/
-	hide: function() {
+    this.length = 1;
 
-		//this._navigation.remove();
-		this._navigation.hide();
+    return this;
+  },
 
-		return this;
-	},
+  /**
+  * @method hide
+  * Hide the navigation group
+  */
+  hide: function() {
 
-	/**
-	* @method destroy
-	* Destroy the navigation window
-	*/
-	destroy: function() {
+    //this._navigation.remove();
+    this._navigation.hide();
 
+    return this;
+  },
+
+  /**
+  * @method destroy
+  * Destroy the navigation window
+  */
+  destroy: function() {
+
+    if (this._options.orientable) {
+      Ti.Gesture.removeEventListener('orientationchange',this._updateSize);
+    }
     this._navigation.close();
     this._navigation = null;
 
-	},
+  },
 
-	/**
-	* @method show
-	* Show the navigation group
-	*/
-	show: function() {
+  /**
+  * @method show
+  * Show the navigation group
+  */
+  show: function() {
 
-		this._navigation.show();
+    this._navigation.show();
 
-		return this;
-	},
+    return this;
+  },
 
-	/**
-	* @method open
-	* Open a new window inside the navigation
-	* @param {presto.Plugin} plugin
-	* @chainable
-	*/
-	open: function(plugin) {
+  /**
+  * @method open
+  * Open a new window inside the navigation
+  * @param {presto.Plugin} plugin
+  * @chainable
+  */
+  open: function(plugin) {
 
-		//logger.info('open@navigation');
+    //logger.info('open@navigation');
 
-		var that = this;
+    var that = this;
 
-		// open the window
-		that._navigation.openWindow(plugin.getWindow());
-		// set again the navigation (not really necessary)
-		//plugin.setNavigation(that.getNavigation());
+    // open the window
+    that._navigation.openWindow(plugin.getWindow());
+    // set again the navigation (not really necessary)
+    //plugin.setNavigation(that.getNavigation());
 
-		// increment stack counter
-		that.length += 1;
+    // increment stack counter
+    that.length += 1;
 
-		return that;
-	},
+    return that;
+  },
 
-	/**
-	* @method close
-	* Close a window associated with a plugin
-	* @param {presto.Plugin} plugin
-	* @chainable
-	*/
-	close: function(plugin) {
+  /**
+  * @method close
+  * Close a window associated with a plugin
+  * @param {presto.Plugin} plugin
+  * @chainable
+  */
+  close: function(plugin) {
 
-		var that = this;
-		var window = plugin.getWindow();
+    var that = this;
+    var window = plugin.getWindow();
 
-		that._navigation.closeWindow(window);
+    that._navigation.closeWindow(window);
 
-		that.length -= 1;
+    that.length -= 1;
 
-		return that;
-	},
+    return that;
+  },
 
-	/**
-	* @method openWindow
-	* Open a window
-	* @param {Ti.UI.Window} window
-	* @chainable
-	*/
-	openWindow: function(window) {
+  /**
+  * @method openWindow
+  * Open a window
+  * @param {Ti.UI.Window} window
+  * @chainable
+  */
+  openWindow: function(window) {
 
-		var that = this;
+    var that = this;
 
-		Ti.API.info('openWindow@navivation -> '+JSON.stringify(window));
+    Ti.API.info('openWindow@navivation -> '+JSON.stringify(window));
 
-		// open the window
-		that._navigation.openWindow(window);
-		// set again the navigation (not really necessary)
-		//plugin.setNavigation(that.getNavigation());
+    // open the window
+    that._navigation.openWindow(window);
+    // set again the navigation (not really necessary)
+    //plugin.setNavigation(that.getNavigation());
 
-		// increment stack counter
-		that.length += 1;
+    // increment stack counter
+    that.length += 1;
 
-		return that;
+    return that;
 
-	},
+  },
 
-	/**
-	* @method closeWindow
-	* Close a window
-	* @param {Ti.UI.Window} window
-	* @chainable
-	*/
-	closeWindow: function(window) {
+  /**
+  * @method closeWindow
+  * Close a window
+  * @param {Ti.UI.Window} window
+  * @chainable
+  */
+  closeWindow: function(window) {
 
-		var that = this;
+    var that = this;
 
-		that._navigation.closeWindow(window);
+    that._navigation.closeWindow(window);
 
-		that.length -= 1;
+    that.length -= 1;
 
-		return that;
-	}
+    return that;
+  }
 
 
 });
