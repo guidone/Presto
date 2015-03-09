@@ -157,6 +157,10 @@ var moment = require('/presto/components/moment/moment');
 * sets of information, if set to true, only content with the custom field 'language' (same as the phone) will
 * be downloaded
 */
+/**
+ * @property {Function/String} comparator
+ * A Backbone comparator function to sort the collection, could be the Backbone model field or a function
+ */
 
 /**
 * @class presto.models.Menu
@@ -647,6 +651,20 @@ var Photo = Backbone.Model.extend({
     }
 
     return result;
+  },
+
+  /**
+   * @method getCustomField
+   * Returns a custom field if exists, or null
+   * @param {String} field
+   * @return {Mixed}
+   */
+  getCustomField: function(key) {
+
+    var that = this;
+    var json = that.getCustomFields(key);
+
+    return json != null ? json[key] : null;
   }
 
 });

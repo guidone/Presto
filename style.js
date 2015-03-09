@@ -12,12 +12,7 @@ module.exports.style = {
   },
 
   '.pr-toolbarbtn-menu': {
-    borderColor: '#C65D58',
-    borderWidth: '1dp',
-    borderRadius: '4dp',
     backgroundImage: '/themes/roller/images/buttons/menu.png',
-    backgroundLeftCap: '0dp',
-    backgroundTopCap: 0,
     width: '36dp',
     height: '30dp'
   },
@@ -549,6 +544,17 @@ module.exports.style = {
   '.pr-form': {
     layout: 'vertical'
   },
+
+  /*
+   backgroundColor: '#eeeeee',
+   border: Ti.UI.INPUT_BORDERSTYLE_ROUNDED,
+   borderRadius: '4dp',
+   borderWidth: '2dp',
+   borderColor: '#aa7942',
+
+   */
+
+
 
   '.pr-form-group': {
     borderRadius: '6dp',

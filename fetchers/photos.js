@@ -58,7 +58,7 @@ module.exports = function(contentClass,isDownloaded) {
 
 		var events = new Events();
 		events.fetch({
-			limit: null, // all
+			limit: 1000, // all
 			where: 'tag = ?',
 			params: className
 		});
@@ -99,7 +99,7 @@ module.exports = function(contentClass,isDownloaded) {
 		photos.fetch({
 			where: 'tag = ?',
 			params: className,
-			limit: -1
+			limit: 1000
 		});
 		photos.each(function (item) {
 			md5_list.push(item.get('md5'));
@@ -109,12 +109,14 @@ module.exports = function(contentClass,isDownloaded) {
 
 	// query for pictures
 	Cloud.Photos.query({
-		where: whereClause
+		where: whereClause,
+    limit: 1000
 	},function(result) {
 
 		// if any
 		if (_.isArray(result.photos) != null && result.photos.length !== 0) {
 
+      logger.info('Found photos: '+result.photos.length);
 			// notify the deferred, number of steps now is the number of images to download          n
 			notify.current = 1;
 			notify.steps = result.photos.length*imageSizes.length;
@@ -147,7 +149,7 @@ module.exports = function(contentClass,isDownloaded) {
 
 				// standard fields
 				sqlite_photo.guid = photo.id;
-				sqlite_photo.set('id_user',photo.user.id);
+				sqlite_photo.set('id_user',photo.user_id);
 				sqlite_photo.set('tag',className);
 				if (photo.custom_fields != null) {
 					// store custom fields as title
@@ -188,7 +190,6 @@ module.exports = function(contentClass,isDownloaded) {
 
 							var download = that.downloadPhotos(
 								photo.urls[size],
-								//new_node.path+'photos/cacca'+size+'.png'
 								new_node.path+relativeFilename
 							);
 

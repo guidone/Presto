@@ -183,12 +183,17 @@ var Plugin = Base.extend({
         _(contentDefinition.types).each(function(type) {
           // get the collection
           var collection = that.getCollection(type);
+          // set a comparator if any
+          if (contentDefinition.comparator != null) {
+            collection.comparator = contentDefinition.comparator;
+          }
           // store in the plugin
           that._collection = collection;
           // do fetch
           collection.fetch({
             where: query,
-            params: params
+            params: params,
+            limit: 1000
           });
           // store
           result[type] = collection;

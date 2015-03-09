@@ -21,72 +21,72 @@ module.exports = function(contentClass,isDownloaded) {
 	var dbName = 'presto';
 	var tableName = 'objects';
 	var fields = ['created_at','updated_at'];
-	
+
 	var new_node = that.getContentNode(className);
-	
+
 	// same as the class name
 	var objectClass = className;
 
 	if (!new_node.isLocal) {
-		
+
 		logger.info('Loading from online ....');
 
 		Cloud.Objects.query({
 			classname: objectClass
 		},function(result) {
-			
+
 			logger.info('Objects -> '+JSON.stringify(result));
 
 			// delete all previous content
             db = Ti.Database.open(dbName);
-            db.execute("BEGIN;");            
-            db.execute('DELETE FROM '+tableName+' WHERE tag = ?',className);				
+            db.execute("BEGIN;");
+            db.execute('DELETE FROM '+tableName+' WHERE tag = ?',className);
             db.execute("COMMIT;");
             db.close();
-					
+
 			// if any
 			if (_.isArray(result[objectClass]) != null && result[objectClass].length !== 0) {
-				
+
 				// enqueue all object
 				_(result[objectClass]).each(function(obj) {
-					
+
 					var sqlite_object = new Obj();
 
 					// standard fields
 					sqlite_object.guid = obj.id;
-					sqlite_object.set('id_user',obj.user.id);
-					sqlite_object.set('tag',className);					
-					
+					sqlite_object.set('id_user',obj.user_id);
+					sqlite_object.set('tag',className);
+
 					// specific fields
 					_(fields).each(function(field) {
 						sqlite_object.set(field,obj[field]);
 					});
-					
+
 					sqlite_object.set('json',JSON.stringify(obj));
-				
+
 					sqlite_object.save();
 
 				});
-				
+
 				// create the directory
 				// store in memory
 				//new_node[objectClass] = result[objectClass];
-			
+
 			} // end if post
-			
+
 			// done resolve
-			deferred.resolve();	
+			deferred.resolve();
 		});
 	} else {
-		
+
 		logger.info('Loading from local '+this.getStaticDocumentPath());
-		
+
 		// do nothing
-								
+
 		deferred.resolve();
-		
-	}	
-	
-	
+
+	}
+
+
 	return deferred.promise();
 };

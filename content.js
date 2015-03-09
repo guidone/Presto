@@ -305,6 +305,7 @@ var Content = Class.extend({
 
       },
       onerror: function(e) {
+        logger.info('Error downloading image: '+url);
         deferred.reject();
 // !todo handle errors
       },
